@@ -79,8 +79,7 @@ func main() {
 	failOnError(err, "Failed to register a consumer")
 
 	var forever chan struct{}
-
-	// ================ worker receiver with sleep time ===============================
+	
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
