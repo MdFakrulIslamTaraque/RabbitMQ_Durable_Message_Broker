@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+
+  sender:
+    container_name: sender
+    build:
+      context: sender
+      dockerfile: Dockerfile
+    ports:
+          - "1110:1110"
+    networks:
+      - message_broker_network
+
+    restart: on-failure
+    tty: true
+
+  receiver1:
+    container_name: receiver1
+    build:
+      context: receiver
+      dockerfile: Dockerfile
+    networks:
+      - message_broker_network
+
+    restart: on-failure
+    tty: true
+
+  receiver2:
+      container_name: receiver2
+      build:
+        context: receiver
+        dockerfile: Dockerfile
+#      ports:
+#        - "1110:1111"
+      networks:
+        - message_broker_network
+
+      restart: on-failure
+      tty: true
+
+  receiver3:
+    container_name: receiver3
+    build:
+      context: receiver
+      dockerfile: Dockerfile
+#    ports:
+#      - "1110:1111"
+    networks:
+      - message_broker_network
+
+    restart: on-failure
+    tty: true
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: 'rabbitmq:3.13-management'
+    ports:
+      - "15672:15672"
+    volumes:
+      - rabbitmq_storage:/var/lib/rabbitmq
+    networks:
+      - message_broker_network
+
+    restart: on-failure
+    tty: true
+
+  message_broker_db:
+    container_name: message_broker_db
+    image: 'mysql:latest'
+    ports:
+      - "5673:3306"
+    volumes:
+      - message_broker_db_storage:/var/lib/mysql
+    networks:
+      - message_broker_network
+
+    environment:
+      - MYSQL_USER=message_receiver
+      - MYSQL_PASSWORD=12345678
+      - MYSQL_DATABASE=message
+      - MYSQL_ROOT_PASSWORD=12345678
+    restart: on-failure
+    tty: true
+
+networks:
+  message_broker_network:
+    driver: bridge
+volumes:
+  rabbitmq_storage:
+  message_broker_db_storage:

@@ -19,9 +19,10 @@ func failOnError(err error, msg string) {
 }
 
 type User struct {
-	ID   int    `gorm:"primaryKey" json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+	ID         int    `gorm:"primaryKey" json:"id"`
+	Name       string `json:"name"`
+	Age        int    `json:"age"`
+	RetryCount int    `json:"retryCount"`
 }
 
 var DB *gorm.DB
@@ -29,7 +30,7 @@ var DB *gorm.DB
 func CreateUser(c echo.Context) error {
 
 	//creating a connection to the RabbitMQ server
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -80,7 +81,7 @@ func CreateUser(c echo.Context) error {
 }
 
 func GetAllUsers(c echo.Context) error {
-	var users []*User
+	var users []User
 	if err := DB.Find(&users).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -93,5 +94,5 @@ func main() {
 	e.GET("/users", GetAllUsers)
 	e.POST("/user", CreateUser)
 	// Start server
-	e.Logger.Fatal(e.Start(":1111"))
+	e.Logger.Fatal(e.Start(":1110"))
 }
