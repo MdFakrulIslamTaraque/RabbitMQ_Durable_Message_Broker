@@ -5,7 +5,6 @@
 ### Prerequisites
 - Docker
 - Docker Compose
-- Go >= 1.18
 
 Run the following command to start the development environment:
 ```bash
