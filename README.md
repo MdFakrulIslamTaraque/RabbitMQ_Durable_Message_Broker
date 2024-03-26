@@ -27,6 +27,8 @@ To check the message queue, navigate to the RabbitMQ management console immediat
 Check the database with proper credentials in the docker-compose file to see if the message was successfully processed.
 
 ```database Credentials
+      - HOST = localhost
+      - Port = 5673
       - MYSQL_USER = message_receiver
       - MYSQL_PASSWORD = 12345678
 ```
