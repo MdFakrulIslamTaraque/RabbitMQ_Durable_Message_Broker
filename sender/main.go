@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"net/http"
 	"time"
@@ -79,10 +80,26 @@ func CreateUser(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, "message sent successfully")
 }
-
+func ConnectSQL() *gorm.DB {
+	dsn := "message_receiver:12345678@tcp(message_broker_db:3306)/message?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("connection established")
+	}
+	// Create and migrate db
+	err = db.AutoMigrate(&User{})
+	if err != nil {
+		log.Error("Failed to migrate db")
+		return nil
+	}
+	return db
+}
 func GetAllUsers(c echo.Context) error {
-	var users []User
-	if err := DB.Find(&users).Error; err != nil {
+	var users []*User
+	db := ConnectSQL()
+	if err := db.Find(&users).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, users)
@@ -91,7 +108,7 @@ func GetAllUsers(c echo.Context) error {
 func main() {
 	e := echo.New()
 	// Routes
-	e.GET("/users", GetAllUsers)
+	e.GET("/user_list", GetAllUsers)
 	e.POST("/user", CreateUser)
 	// Start server
 	e.Logger.Fatal(e.Start(":1110"))
